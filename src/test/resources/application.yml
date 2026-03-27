@@ -1,0 +1,15 @@
+spring:
+  datasource:
+    url: jdbc:sqlite:./target/test-resource.db
+    driver-class-name: org.sqlite.JDBC
+  sql:
+    init:
+      mode: always
+
+# 避免 MapDB 文件锁导致集成测试多次启动同一 JVM 失败
+app:
+  mapdb:
+    in-memory: true
+  admin:
+    username: admin
+    password: test-admin-secret

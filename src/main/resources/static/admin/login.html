@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#f5f7fb">
+  <title>管理后台 · 登录</title>
+  <link rel="stylesheet" href="/admin/css/login.css">
+</head>
+<body>
+  <div class="card">
+    <h1>管理后台</h1>
+    <p class="sub">请输入管理员账号与密码</p>
+    <form action="/admin/perform_login" method="post" autocomplete="on">
+      <label for="username">账号</label>
+      <input id="username" name="username" type="text" required autocomplete="username" autocapitalize="off">
+      <label for="password">密码</label>
+      <input id="password" name="password" type="password" required autocomplete="current-password">
+      <button type="submit">登录</button>
+    </form>
+    <p id="msgOk" class="msg ok" hidden>已退出登录。</p>
+    <p id="msgErr" class="msg err" hidden>账号或密码错误，请重试。</p>
+    <p class="back"><a href="/">返回首页</a></p>
+  </div>
+  <script src="/admin/js/login.js"></script>
+</body>
+</html>

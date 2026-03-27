@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#f5f7fb">
+  <title>资源检索系统</title>
+  <link rel="stylesheet" href="/css/index.css">
+  <script src="/js/index-site.js"></script>
+</head>
+<body>
+  <main class="container">
+    <section class="card">
+      <h1>资源检索系统</h1>
+      <div class="top-actions">
+        <button type="button" class="btn-secondary" id="btnOpenSubmitResource">提交资源</button>
+        <button type="button" class="btn-secondary" id="btnOpenBlockWord">添加屏蔽词</button>
+      </div>
+      <p class="desc">输入关键词，检索已入库资源（支持全文检索与高亮展示）。</p>
+
+      <div id="homeStats" class="home-stats" hidden>
+        <p class="stat-line">收录资源总数：<strong id="statTotal">—</strong> 条</p>
+        <div class="hot-line">
+          <span class="hot-label">热门搜索词</span>
+          <div id="hotKeywords" class="hot-keywords"></div>
+        </div>
+      </div>
+
+      <form id="searchForm" class="search-bar">
+        <input id="keyword" type="text" placeholder="关键词尽量完整，结果会更精准" required>
+        <select id="sortBy" aria-label="排序方式">
+          <option value="relevance">相关度</option>
+          <option value="time">时间</option>
+          <option value="hot">热度</option>
+        </select>
+        <button id="submitBtn" type="submit">搜索</button>
+      </form>
+
+      <div id="meta" class="meta"></div>
+      <div id="error" class="error"></div>
+      <div id="list" class="list"></div>
+
+      <footer class="disclaimer" role="note">
+        免责申明：本站不产生或存储资源内容，也未参与录制与上传。展示结果均来自网络与网友提交；如涉及权益或版权问题，可通过上方「添加屏蔽词」反馈。
+      </footer>
+    </section>
+  </main>
+
+  <div class="modal-backdrop" id="modalSubmitResource" role="dialog" aria-modal="true" aria-labelledby="modalSubmitTitle">
+    <div class="modal-panel">
+      <h2 id="modalSubmitTitle">提交资源</h2>
+      <form id="formSubmitResource">
+        <div class="form-row">
+          <label for="resTitle">标题</label>
+          <input id="resTitle" name="title" required maxlength="500" placeholder="资源标题" autocomplete="off">
+        </div>
+        <div class="form-row">
+          <label for="resUrl">链接</label>
+          <input id="resUrl" name="url" type="text" maxlength="2000" placeholder="链接、网盘口令等任意文本" autocomplete="off">
+        </div>
+        <p id="submitResourceMsg" class="toast-ok" hidden></p>
+        <p id="submitResourceErr" class="toast-err" hidden></p>
+        <div class="modal-actions">
+          <button type="button" class="btn-secondary" id="btnCloseSubmitResource">取消</button>
+          <button type="submit" id="btnConfirmSubmitResource">提交</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="modalBlockWord" role="dialog" aria-modal="true" aria-labelledby="modalBlockTitle">
+    <div class="modal-panel">
+      <h2 id="modalBlockTitle">添加屏蔽词</h2>
+      <p class="form-hint">命中该词的条目将不在搜索结果中展示（匹配标题、正文、标签）。</p>
+      <form id="formBlockWord">
+        <div class="form-row">
+          <label for="blockKeyword">屏蔽词</label>
+          <input id="blockKeyword" name="keyword" required maxlength="200" placeholder="输入需屏蔽的词或短语">
+        </div>
+        <p id="blockWordMsg" class="toast-ok" hidden></p>
+        <p id="blockWordErr" class="toast-err" hidden></p>
+        <div class="modal-actions">
+          <button type="button" class="btn-secondary" id="btnCloseBlockWord">取消</button>
+          <button type="submit" id="btnConfirmBlockWord">添加</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  <script src="/js/index.js"></script>
+</body>
+</html>

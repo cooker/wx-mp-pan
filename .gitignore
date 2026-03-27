@@ -1,0 +1,41 @@
+# --- 文件夹与存储 ---
+# 忽略所有上传的二维码图片（非常重要，保护隐私且不污染仓库）
+uploads/
+
+# --- Python 垃圾文件 ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# --- 虚拟环境 ---
+venv/
+ENV/
+.env
+
+# --- 操作系统临时文件 ---
+.DS_Store
+Thumbs.db
+
+# --- 编辑器配置 ---
+.vscode/
+.idea/
+*.swp
+instance/*

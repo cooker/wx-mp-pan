@@ -1,0 +1,16 @@
+spring:
+  datasource:
+    url: jdbc:sqlite:./resource.db
+    driver-class-name: org.sqlite.JDBC
+  sql:
+    init:
+      mode: always
+
+server:
+  port: 8080
+
+# 后台登录（生产务必通过环境变量覆盖密码）
+app:
+  admin:
+    username: admin
+    password: ${APP_ADMIN_PASSWORD:admin321}
