@@ -1,8 +1,10 @@
 package com.github.cooker.pan.repository;
 
 import com.github.cooker.pan.dto.AdminAnalyticsEventItemDto;
+import com.github.cooker.pan.dto.AdminAnalyticsGroupedRowDto;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -134,6 +136,90 @@ public class AnalyticsEventRepository {
             k,
             size,
             offset
+        );
+    }
+
+    /**
+     * 按 User-Agent 粗分为 android / ios / windows / macos / linux / unknown / other（顺序由上层固定补全）。
+     * 判定顺序：空 UA → Android → iOS → Windows → macOS → Linux → 其他（含 Chrome OS 等）。
+     */
+    public List<AdminAnalyticsGroupedRowDto> aggregateByUserAgentPlatform() {
+        return jdbcTemplate.query(
+            """
+                SELECT group_key, COUNT(*) AS event_count, MAX(created_at) AS last_seen_at
+                FROM (
+                    SELECT
+                        CASE
+                            WHEN user_agent IS NULL OR TRIM(COALESCE(user_agent, '')) = '' THEN 'unknown'
+                            WHEN LOWER(user_agent) LIKE '%android%' THEN 'android'
+                            WHEN user_agent LIKE '%iPhone%'
+                                OR user_agent LIKE '%iPad%'
+                                OR user_agent LIKE '%iPod%' THEN 'ios'
+                            WHEN user_agent LIKE '%Windows NT%'
+                                OR user_agent LIKE '%Windows Phone%' THEN 'windows'
+                            WHEN user_agent LIKE '%Macintosh%' OR user_agent LIKE '%Mac OS X%' THEN 'macos'
+                            WHEN LOWER(user_agent) LIKE '%linux%' THEN 'linux'
+                            ELSE 'other'
+                        END AS group_key,
+                        created_at
+                    FROM analytics_event
+                ) x
+                GROUP BY group_key
+                """,
+            groupedRowMapper()
+        );
+    }
+
+    public long countGroupedByIp(String keyword) {
+        boolean hasKw = keyword != null && !keyword.isBlank();
+        String sql =
+            """
+                SELECT COUNT(*) FROM (
+                  SELECT 1 FROM analytics_event
+                  WHERE TRIM(COALESCE(ip_address,'')) <> ''
+                """
+                + (hasKw ? " AND LOWER(ip_address) LIKE LOWER(?) " : "")
+                + """
+                  GROUP BY ip_address
+                ) t
+                """;
+        if (hasKw) {
+            Long n = jdbcTemplate.queryForObject(sql, Long.class, "%" + keyword.trim() + "%");
+            return n == null ? 0L : n;
+        }
+        Long n = jdbcTemplate.queryForObject(sql, Long.class);
+        return n == null ? 0L : n;
+    }
+
+    public List<AdminAnalyticsGroupedRowDto> findGroupedByIp(int page, int size, String keyword) {
+        int offset = page * size;
+        boolean hasKw = keyword != null && !keyword.isBlank();
+        String sql =
+            """
+                SELECT ip_address AS group_key, COUNT(*) AS event_count, MAX(created_at) AS last_seen_at
+                FROM analytics_event
+                WHERE TRIM(COALESCE(ip_address,'')) <> ''
+                """
+                + (hasKw ? " AND LOWER(ip_address) LIKE LOWER(?) " : "")
+                + """
+                GROUP BY ip_address
+                ORDER BY event_count DESC, last_seen_at DESC
+                LIMIT ? OFFSET ?
+                """;
+        List<Object> args = new ArrayList<>();
+        if (hasKw) {
+            args.add("%" + keyword.trim() + "%");
+        }
+        args.add(size);
+        args.add(offset);
+        return jdbcTemplate.query(sql, groupedRowMapper(), args.toArray());
+    }
+
+    private RowMapper<AdminAnalyticsGroupedRowDto> groupedRowMapper() {
+        return (rs, rowNum) -> new AdminAnalyticsGroupedRowDto(
+            rs.getString("group_key"),
+            rs.getLong("event_count"),
+            rs.getTimestamp("last_seen_at").toInstant()
         );
     }
 

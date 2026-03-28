@@ -12,19 +12,7 @@
   <main class="container">
     <section class="card">
       <h1>资源检索系统</h1>
-      <div class="top-actions">
-        <button type="button" class="btn-secondary" id="btnOpenSubmitResource">提交资源</button>
-        <button type="button" class="btn-secondary" id="btnOpenBlockWord">添加屏蔽词</button>
-      </div>
       <p class="desc">输入关键词，检索已入库资源（支持全文检索与高亮展示）。</p>
-
-      <div id="homeStats" class="home-stats" hidden>
-        <p class="stat-line">收录资源总数：<strong id="statTotal">—</strong> 条</p>
-        <div class="hot-line">
-          <span class="hot-label">热门搜索词</span>
-          <div id="hotKeywords" class="hot-keywords"></div>
-        </div>
-      </div>
 
       <form id="searchForm" class="search-bar">
         <input id="keyword" type="text" placeholder="关键词尽量完整，结果会更精准" required>
@@ -35,6 +23,24 @@
         </select>
         <button id="submitBtn" type="submit">搜索</button>
       </form>
+
+      <div id="homeStats" class="home-stats" hidden>
+        <p class="stat-line">收录资源总数：<strong id="statTotal">—</strong> 条</p>
+        <div class="hot-line">
+          <span class="hot-label">热门搜索词</span>
+          <div id="hotKeywords" class="hot-keywords"></div>
+        </div>
+      </div>
+
+      <div class="home-aux-toolbar" aria-label="辅助功能与推荐">
+        <div class="home-aux-actions">
+          <button type="button" class="btn-aux btn-secondary" id="btnOpenSubmitResource">提交资源</button>
+          <button type="button" class="btn-aux btn-secondary" id="btnOpenBlockWord">添加屏蔽词</button>
+        </div>
+        <section id="homeAppRecs" class="home-app-recs" hidden aria-label="APP 推荐">
+          <ul id="homeAppRecsList" class="home-app-recs-list" role="list"></ul>
+        </section>
+      </div>
 
       <div id="meta" class="meta"></div>
       <div id="error" class="error"></div>
@@ -56,7 +62,7 @@
         </div>
         <div class="form-row">
           <label for="resUrl">链接</label>
-          <input id="resUrl" name="url" type="text" maxlength="2000" placeholder="链接、网盘口令等任意文本" autocomplete="off">
+          <input id="resUrl" name="url" type="text" maxlength="2000" placeholder="链接、网盘口令等；ed2k 粘贴后可自动填充标题与说明" autocomplete="off">
         </div>
         <p id="submitResourceMsg" class="toast-ok" hidden></p>
         <p id="submitResourceErr" class="toast-err" hidden></p>
@@ -86,6 +92,7 @@
       </form>
     </div>
   </div>
+  <script src="/js/link-parse.js"></script>
   <script src="/js/index.js"></script>
 </body>
 </html>

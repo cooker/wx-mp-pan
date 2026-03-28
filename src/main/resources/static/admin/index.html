@@ -11,11 +11,23 @@
 <div id="app" class="admin-shell">
   <el-container direction="vertical" style="height:100vh;height:100dvh;min-height:0">
     <el-header class="admin-header">
-      <div class="admin-brand">
-        <div class="admin-mark" aria-hidden="true">管</div>
-        <div class="admin-brand-text">
-          <div class="admin-title">资源检索</div>
-          <div class="admin-subtitle">管理后台</div>
+      <div class="admin-header-start">
+        <el-button
+          v-show="isMobileLayout"
+          text
+          type="primary"
+          class="admin-menu-toggle"
+          aria-label="打开导航菜单"
+          @click="toggleAdminAside"
+        >
+          <span class="admin-menu-toggle-icon" aria-hidden="true">☰</span>
+        </el-button>
+        <div class="admin-brand">
+          <div class="admin-mark" aria-hidden="true">管</div>
+          <div class="admin-brand-text">
+            <div class="admin-title">资源检索</div>
+            <div class="admin-subtitle">管理后台</div>
+          </div>
         </div>
       </div>
       <div class="admin-actions">
@@ -54,6 +66,7 @@
 <script src="/admin/js/components/pages/published-page.js"></script>
 <script src="/admin/js/components/pages/blocked-review-page.js"></script>
 <script src="/admin/js/components/pages/blocked-manage-page.js"></script>
+<script src="/js/link-parse.js"></script>
 <script src="/admin/js/admin-app.js"></script>
 </body>
 </html>

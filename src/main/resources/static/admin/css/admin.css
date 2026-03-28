@@ -27,10 +27,42 @@
       border-bottom: 1px solid var(--el-border-color-lighter);
       box-shadow: 0 1px 0 rgba(15, 23, 42, 0.04);
     }
+    .admin-header-start {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      min-width: 0;
+    }
+    .admin-menu-toggle {
+      flex-shrink: 0;
+      min-width: 44px !important;
+      min-height: 44px !important;
+      padding: 0 10px !important;
+      margin-left: -6px;
+      font-size: 20px;
+      line-height: 1;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .admin-menu-toggle-icon {
+      display: block;
+      font-weight: 600;
+    }
+    .admin-aside-wrap {
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      height: 100%;
+      min-height: 0;
+      position: relative;
+    }
+    .admin-aside-overlay {
+      display: none;
+    }
     .admin-brand {
       display: flex;
       align-items: center;
       gap: 14px;
+      min-width: 0;
     }
     .admin-mark {
       width: 36px;
@@ -164,6 +196,26 @@
       color: var(--el-text-color-primary);
       margin-bottom: 12px;
     }
+    .app-rec-editor {
+      width: 100%;
+      max-width: 920px;
+    }
+    .app-rec-hint {
+      margin: 0 0 12px;
+      font-size: 13px;
+      line-height: 1.55;
+      color: var(--el-text-color-secondary);
+    }
+    .app-rec-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr) minmax(0, 1.2fr) auto;
+      gap: 10px;
+      align-items: start;
+      margin-bottom: 12px;
+    }
+    .app-rec-field {
+      min-width: 0;
+    }
     .cat-add-panel .el-form--inline .el-form-item {
       margin-bottom: 0;
       margin-right: 16px;
@@ -268,6 +320,20 @@
     .ana-cards {
       margin-bottom: 16px;
     }
+    .ana-view-switch-wrap {
+      margin-bottom: 14px;
+    }
+    .ana-view-switch {
+      flex-wrap: wrap;
+    }
+    .ana-toolbar {
+      align-items: center;
+    }
+    .ana-platform-hint {
+      font-size: 13px;
+      color: var(--el-text-color-secondary);
+      line-height: 1.5;
+    }
     .ana-card {
       border: 1px solid var(--el-border-color-lighter);
       border-radius: 10px;
@@ -285,13 +351,85 @@
       color: var(--el-text-color-primary);
       font-variant-numeric: tabular-nums;
     }
-    @media (max-width: 768px) {
-      .admin-aside {
-        width: 200px !important;
+    @media (max-width: 900px) {
+      .admin-aside-wrap {
+        flex: 0 0 0;
+        width: 0;
+        overflow: visible;
+      }
+      .admin-aside.admin-aside {
+        position: fixed !important;
+        left: 0;
+        top: var(--admin-header-h);
+        bottom: 0;
+        z-index: 2001;
+        width: min(272px, 86vw) !important;
+        max-width: none !important;
+        transform: translateX(-100%);
+        transition: transform 0.22s ease;
+        box-shadow: none;
+      }
+      .admin-aside.admin-aside.admin-aside--open {
+        transform: translateX(0);
+        box-shadow: 12px 0 40px rgba(15, 23, 42, 0.22);
+      }
+      .admin-aside-overlay {
+        display: block;
+        position: fixed;
+        left: 0;
+        right: 0;
+        top: var(--admin-header-h);
+        bottom: 0;
+        z-index: 2000;
+        background: rgba(15, 23, 42, 0.42);
+        -webkit-tap-highlight-color: transparent;
       }
       .admin-header {
-        padding: 0 14px !important;
+        padding: 0 12px 0 8px !important;
       }
+      .admin-main {
+        padding: 14px 12px 24px !important;
+      }
+      .page-card .el-card__header {
+        padding: 12px 14px;
+      }
+      .page-card .el-card__body {
+        padding: 14px;
+      }
+      .toolbar {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .toolbar .el-button,
+      .toolbar .el-input {
+        width: 100% !important;
+        max-width: none;
+      }
+      .pagination-bar {
+        justify-content: center;
+      }
+      .app-rec-row {
+        grid-template-columns: 1fr;
+      }
+      .app-rec-row .el-button {
+        width: 100%;
+      }
+    }
+
+    @media (min-width: 901px) {
+      .admin-menu-toggle {
+        display: none !important;
+      }
+    }
+
+    @media (max-width: 768px) {
       .admin-mark { width: 32px; height: 32px; font-size: 13px; }
       .admin-title { font-size: 15px; }
+      .admin-subtitle { font-size: 11px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .admin-aside.admin-aside {
+        transition: none !important;
+      }
     }

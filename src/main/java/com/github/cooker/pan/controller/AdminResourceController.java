@@ -2,6 +2,9 @@ package com.github.cooker.pan.controller;
 
 import com.github.cooker.pan.dto.AdminCreatePublishedResourceRequest;
 import com.github.cooker.pan.dto.AdminPublishedPage;
+import com.github.cooker.pan.dto.AdminResourceExportBundle;
+import com.github.cooker.pan.dto.AdminResourceImportRequest;
+import com.github.cooker.pan.dto.AdminResourceImportResult;
 import com.github.cooker.pan.dto.ApproveResourceRequest;
 import com.github.cooker.pan.dto.PendingResourceDto;
 import com.github.cooker.pan.service.AdminResourceService;
@@ -49,6 +52,18 @@ public class AdminResourceController {
         @RequestParam(required = false) String keyword
     ) {
         return adminResourceService.listPublished(page, size, keyword);
+    }
+
+    /** 全量导出已上线资源为 JSON（含正文、分类名、热度等） */
+    @GetMapping("/published/export")
+    public AdminResourceExportBundle exportPublished() {
+        return adminResourceService.exportPublished();
+    }
+
+    /** 批量导入为新的已上线资源（新 id）；分类按 categoryId 或 categoryName 匹配 */
+    @PostMapping("/published/import")
+    public AdminResourceImportResult importPublished(@Valid @RequestBody AdminResourceImportRequest request) {
+        return adminResourceService.importPublished(request.items());
     }
 
     @DeleteMapping("/published/{id}")

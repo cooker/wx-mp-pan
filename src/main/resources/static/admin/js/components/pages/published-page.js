@@ -2,13 +2,13 @@
   window.AdminComponents = window.AdminComponents || {};
   window.AdminComponents.AdminPublishedPage = {
     name: 'AdminPublishedPage',
-    inject: ['loading', 'pub', 'newRes', 'categories', 'fmtTime', 'createPublishedResource', 'searchPublished', 'loadPublished', 'deletePublished'],
+    inject: ['loading', 'pub', 'newRes', 'categories', 'fmtTime', 'createPublishedResource', 'searchPublished', 'loadPublished', 'deletePublished', 'exportPublishedResources', 'importPublishedResourcesPick'],
     template: `
       <el-card class="page-card" shadow="never">
         <template #header>
           <admin-page-header
             title="资源管理"
-            desc-html="先通过下方<strong>新增资源</strong>填写内容并添加（将直接上线）；下列表为已上线资源，含标题、链接、分类、元数据与<strong>正文全文</strong>；支持搜索与分页；删除后同步移除检索索引。"
+            desc-html="先通过下方<strong>新增资源</strong>填写内容并添加（将直接上线）；下列表为已上线资源，含标题、链接、分类、元数据与<strong>正文全文</strong>；支持<strong>全量导出/导入</strong> JSON、搜索与分页；删除后同步移除检索索引。"
           />
         </template>
         <div class="cat-add-panel">
@@ -18,7 +18,7 @@
               <el-input v-model="newRes.title" placeholder="资源标题" maxlength="500" show-word-limit clearable @keyup.enter="createPublishedResource" />
             </el-form-item>
             <el-form-item label="链接">
-              <el-input v-model="newRes.url" type="textarea" :autosize="{ minRows: 1, maxRows: 4 }" maxlength="2000" placeholder="链接、网盘口令等（可选）" />
+              <el-input v-model="newRes.url" type="textarea" :autosize="{ minRows: 1, maxRows: 4 }" maxlength="2000" placeholder="链接、网盘口令等；ed2k 在字段为空时可自动填充（可选）" />
             </el-form-item>
             <el-form-item label="类型">
               <el-input v-model="newRes.type" maxlength="100" placeholder="可选" clearable style="width:min(280px,100%)" />
@@ -44,6 +44,8 @@
             <template #prefix><span style="color:var(--el-text-color-placeholder);font-size:14px">⌕</span></template>
           </el-input>
           <el-button type="primary" @click="searchPublished">搜索</el-button>
+          <el-button @click="exportPublishedResources">全量导出 JSON</el-button>
+          <el-button type="success" plain @click="importPublishedResourcesPick">导入 JSON</el-button>
         </div>
         <div v-loading="loading.published" class="res-list">
           <template v-if="pub.list.length">

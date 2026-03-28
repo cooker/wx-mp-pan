@@ -58,12 +58,12 @@
           : `<button type="button" class="btn-copy-link" disabled title="无链接">无链接</button>`;
         return `
           <tr>
-            <td class="cell-title">${title}</td>
-            <td class="cell-cat">${catRaw}</td>
-            <td class="cell-tags">${tagsRaw}</td>
-            <td class="cell-num">${heat}</td>
-            <td class="cell-snippet">${summary}</td>
-            <td class="cell-action">${copyBtn}</td>
+            <td class="cell-title" data-label="标题">${title}</td>
+            <td class="cell-cat" data-label="分类">${catRaw}</td>
+            <td class="cell-tags" data-label="标签">${tagsRaw}</td>
+            <td class="cell-num" data-label="热度">${heat}</td>
+            <td class="cell-snippet" data-label="摘要">${summary}</td>
+            <td class="cell-action" data-label="操作">${copyBtn}</td>
           </tr>`;
       }).join("");
 
@@ -261,6 +261,26 @@
     btnCloseSubmit.addEventListener("click", () => closeModal(modalSubmit));
     btnCloseBlock.addEventListener("click", () => closeModal(modalBlock));
 
+    const resTitleEl = document.getElementById("resTitle");
+    const resUrlEl = document.getElementById("resUrl");
+    function applyP2PAutofillFromUrl() {
+      if (!resUrlEl || !resTitleEl) return;
+      const url = resUrlEl.value.trim();
+      const parseFn = typeof window.parseP2PLink === "function" ? window.parseP2PLink : null;
+      if (!parseFn) return;
+      const parsed = parseFn(url);
+      if (!parsed) return;
+      if (!resTitleEl.value.trim()) {
+        resTitleEl.value = parsed.title.slice(0, 500);
+      }
+    }
+    if (resUrlEl) {
+      resUrlEl.addEventListener("input", applyP2PAutofillFromUrl);
+      resUrlEl.addEventListener("paste", () => {
+        setTimeout(applyP2PAutofillFromUrl, 0);
+      });
+    }
+
     modalSubmit.addEventListener("click", (e) => {
       if (e.target === modalSubmit) closeModal(modalSubmit);
     });
@@ -275,10 +295,22 @@
       msgEl.hidden = true;
       errEl.hidden = true;
 
-      const title = document.getElementById("resTitle").value.trim();
       const url = document.getElementById("resUrl").value.trim();
+      let title = document.getElementById("resTitle").value.trim();
+      const parsed =
+        typeof window.parseP2PLink === "function" ? window.parseP2PLink(url) : null;
+      if (parsed && !title) {
+        title = String(parsed.title || "").slice(0, 500);
+        document.getElementById("resTitle").value = title;
+      }
 
       const body = { title, url };
+      if (parsed && parsed.content) {
+        body.content = parsed.content;
+      }
+      if (parsed && parsed.type) {
+        body.type = parsed.type;
+      }
 
       try {
         const res = await fetch("/api/resources", {

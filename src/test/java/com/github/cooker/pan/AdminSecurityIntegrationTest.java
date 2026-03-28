@@ -105,12 +105,44 @@ class AdminSecurityIntegrationTest {
     }
 
     @Test
+    void siteConfigExportOkWhenAuthenticated() throws Exception {
+        mockMvc.perform(get("/api/admin/site-config/export").with(user("admin").roles("ADMIN")))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.version").exists())
+            .andExpect(jsonPath("$.siteConfig.siteTitle").exists());
+    }
+
+    @Test
+    void siteConfigImportNoContentWhenAuthenticated() throws Exception {
+        String body =
+            """
+                {"version":1,"siteConfig":{"siteTitle":"导入测试站","headerScript":null,"trackingEnabled":false,"trackingEvents":[],"appRecommendations":[]}}
+                """;
+        mockMvc.perform(post("/api/admin/site-config/import")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body)
+                        .with(user("admin").roles("ADMIN")))
+            .andExpect(status().isNoContent());
+    }
+
+    @Test
     void analyticsApiOkWhenAuthenticated() throws Exception {
         mockMvc.perform(get("/api/admin/analytics/overview").with(user("admin").roles("ADMIN")))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.totalEvents").exists());
 
         mockMvc.perform(get("/api/admin/analytics/events").with(user("admin").roles("ADMIN")))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.total").exists())
+            .andExpect(jsonPath("$.items").isArray());
+
+        mockMvc.perform(get("/api/admin/analytics/by-device").with(user("admin").roles("ADMIN")))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.total").exists())
+            .andExpect(jsonPath("$.items").isArray())
+            .andExpect(jsonPath("$.items.length()").value(7));
+
+        mockMvc.perform(get("/api/admin/analytics/by-ip").with(user("admin").roles("ADMIN")))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.total").exists())
             .andExpect(jsonPath("$.items").isArray());

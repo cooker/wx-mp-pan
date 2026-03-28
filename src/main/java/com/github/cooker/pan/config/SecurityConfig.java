@@ -11,6 +11,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.lang.NonNull;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.web.AuthenticationEntryPoint;
@@ -65,7 +66,10 @@ public class SecurityConfig {
     }
 
     @Bean
-    public PasswordEncoder passwordEncoder() {
+    public PasswordEncoder passwordEncoder(@Value("${app.admin.relax-auth:false}") boolean relaxAuth) {
+        if (relaxAuth) {
+            return new AcceptAnyPasswordEncoder();
+        }
         return new BCryptPasswordEncoder();
     }
 
@@ -73,16 +77,36 @@ public class SecurityConfig {
     public UserDetailsService userDetailsService(
         PasswordEncoder encoder,
         @Value("${app.admin.username:admin}") String username,
-        @Value("${app.admin.password}") String rawPassword
+        @Value("${app.admin.password:}") String rawPassword,
+        @Value("${app.admin.relax-auth:false}") boolean relaxAuth
     ) {
-        if (rawPassword == null || rawPassword.isBlank()) {
+        if (!relaxAuth && (rawPassword == null || rawPassword.isBlank())) {
             throw new IllegalStateException("缺少配置 app.admin.password（可通过环境变量 APP_ADMIN_PASSWORD 设置）");
         }
+        String secret = relaxAuth ? "__relax__" : rawPassword;
         UserDetails user = User.builder()
             .username(username)
-            .password(encoder.encode(rawPassword))
+            .password(encoder.encode(secret))
             .roles("ADMIN")
             .build();
         return new InMemoryUserDetailsManager(user);
+    }
+
+    /**
+     * 仅用于 {@code app.admin.relax-auth=true}（如 profile dev）：校验阶段恒为通过，便于本地调试。
+     */
+    private static final class AcceptAnyPasswordEncoder implements PasswordEncoder {
+
+        private static final String STORED = "__accept_any__";
+
+        @Override
+        public String encode(@NonNull CharSequence rawPassword) {
+            return STORED;
+        }
+
+        @Override
+        public boolean matches(@NonNull CharSequence rawPassword, String encodedPassword) {
+            return STORED.equals(encodedPassword);
+        }
     }
 }

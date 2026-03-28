@@ -17,6 +17,66 @@
       }
     }
 
+    function isSafeHttpUrl(s) {
+      if (!s || typeof s !== "string") return false;
+      return /^https?:\/\//i.test(s.trim());
+    }
+
+    function renderAppRecommendations(items) {
+      var wrap = document.getElementById("homeAppRecs");
+      var ul = document.getElementById("homeAppRecsList");
+      if (!wrap || !ul) return;
+      ul.innerHTML = "";
+      if (!Array.isArray(items) || items.length === 0) {
+        wrap.hidden = true;
+        return;
+      }
+      var n = 0;
+      for (var i = 0; i < items.length; i++) {
+        var it = items[i];
+        if (!it) continue;
+        var url = it.downloadUrl != null ? String(it.downloadUrl).trim() : "";
+        if (!isSafeHttpUrl(url)) continue;
+        var icon = it.iconUrl != null ? String(it.iconUrl).trim() : "";
+        if (icon && !isSafeHttpUrl(icon)) icon = "";
+        var labelRaw = it.name != null ? String(it.name).trim() : "";
+        var label = labelRaw || "下载";
+        var phChar =
+          labelRaw && labelRaw.charAt(0) ? labelRaw.charAt(0) : label.charAt(0) || "A";
+        var li = document.createElement("li");
+        li.className = "home-app-rec-item";
+        var a = document.createElement("a");
+        a.className = "home-app-rec-link";
+        a.href = url;
+        a.target = "_blank";
+        a.rel = "noopener noreferrer";
+        a.setAttribute("aria-label", label);
+        if (icon) {
+          var img = document.createElement("img");
+          img.className = "home-app-rec-icon";
+          img.src = icon;
+          img.alt = "";
+          img.loading = "lazy";
+          img.decoding = "async";
+          a.appendChild(img);
+        } else {
+          var ph = document.createElement("span");
+          ph.className = "home-app-rec-placeholder";
+          ph.setAttribute("aria-hidden", "true");
+          ph.textContent = phChar;
+          a.appendChild(ph);
+        }
+        var cap = document.createElement("span");
+        cap.className = "home-app-rec-label";
+        cap.textContent = label;
+        a.appendChild(cap);
+        li.appendChild(a);
+        ul.appendChild(li);
+        n++;
+      }
+      wrap.hidden = n === 0;
+    }
+
     function injectHeadFragment(html) {
       if (!html || !String(html).trim()) return;
       var tpl = document.createElement("template");
@@ -56,6 +116,7 @@
       }
       window.__siteTracking = trackingState;
       injectHeadFragment(cfg.headerScript || "");
+      renderAppRecommendations(cfg.appRecommendations);
       if (!homeViewTracked) {
         track("home_view");
         homeViewTracked = true;
