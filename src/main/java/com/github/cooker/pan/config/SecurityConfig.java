@@ -38,8 +38,13 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http, AuthenticationEntryPoint authenticationEntryPoint) throws Exception {
+    public SecurityFilterChain securityFilterChain(
+            HttpSecurity http,
+            AuthenticationEntryPoint authenticationEntryPoint,
+            LoopbackAuthenticationProvider loopbackAuthenticationProvider)
+            throws Exception {
         http
+            .authenticationProvider(loopbackAuthenticationProvider)
             .csrf(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/admin/login.html", "/admin/perform_login").permitAll()

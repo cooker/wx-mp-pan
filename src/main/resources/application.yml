@@ -10,7 +10,8 @@ server:
   port: 8080
 
 # 后台登录（生产务必通过环境变量覆盖密码）
-# 本地任意密码调试：启动参数增加 --spring.profiles.active=dev（见 application-dev.yml）
+# 自 127.0.0.1 / ::1 等环回地址访问时，表单登录不校验密码（用户名须为 app.admin.username）
+# 另：--spring.profiles.active=dev 时任意来源均可任意密码（见 application-dev.yml）
 app:
   admin:
     username: admin

@@ -42,3 +42,4 @@ instance/*
 resource.db
 search-cache.db
 search-cache.db.wal.0
+target
