@@ -32,7 +32,7 @@ public class SecurityConfig {
         LinkedHashMap<RequestMatcher, AuthenticationEntryPoint> map = new LinkedHashMap<>();
         map.put(new AntPathRequestMatcher("/api/admin/**"), new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED));
         DelegatingAuthenticationEntryPoint delegating = new DelegatingAuthenticationEntryPoint(map);
-        delegating.setDefaultEntryPoint(new LoginUrlAuthenticationEntryPoint("/admin/login.html"));
+        delegating.setDefaultEntryPoint(new LoginUrlAuthenticationEntryPoint("/admin/login"));
         return delegating;
     }
 
@@ -41,23 +41,28 @@ public class SecurityConfig {
         http
             .csrf(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/admin/login.html", "/admin/perform_login").permitAll()
-                .requestMatchers("/admin/css/**", "/admin/js/**").permitAll()
+                .requestMatchers(
+                        "/admin/login",
+                        "/admin/login.html",
+                        "/admin/index.html",
+                        "/admin/perform_login",
+                        "/admin/logout")
+                    .permitAll()
                 .requestMatchers("/admin").permitAll()
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
                 .requestMatchers("/admin/**").authenticated()
                 .anyRequest().permitAll()
             )
-            .formLogin(form -> form
-                .loginPage("/admin/login.html")
+                .formLogin(form -> form
+                .loginPage("/admin/login")
                 .loginProcessingUrl("/admin/perform_login")
-                .defaultSuccessUrl("/admin/index.html", true)
-                .failureUrl("/admin/login.html?error")
+                .defaultSuccessUrl("/admin/dashboard", true)
+                .failureUrl("/admin/login?error")
                 .permitAll()
             )
             .logout(logout -> logout
                 .logoutUrl("/admin/logout")
-                .logoutSuccessUrl("/admin/login.html?logout")
+                .logoutSuccessUrl("/admin/login?logout")
                 .permitAll()
             )
             .exceptionHandling(exception -> exception.authenticationEntryPoint(authenticationEntryPoint));

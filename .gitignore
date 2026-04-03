@@ -39,3 +39,12 @@ Thumbs.db
 .idea/
 *.swp
 instance/*
+
+# Maven
+target/
+
+# 前端（pnpm）
+frontend/node_modules/
+resource.db
+search-cache.db
+search-cache.db.wal.0

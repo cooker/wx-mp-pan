@@ -1,18 +1,19 @@
 package com.github.cooker.pan.controller;
 
 import com.github.cooker.pan.dto.AdminCreatePublishedResourceRequest;
+import com.github.cooker.pan.dto.AdminPendingPage;
 import com.github.cooker.pan.dto.AdminPublishedPage;
 import com.github.cooker.pan.dto.ApproveResourceRequest;
-import com.github.cooker.pan.dto.PendingResourceDto;
+import com.github.cooker.pan.dto.AdminResourceUpdateRequest;
 import com.github.cooker.pan.service.AdminResourceService;
 import jakarta.validation.Valid;
 import java.net.URI;
-import java.util.List;
 import java.util.Map;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -38,8 +39,8 @@ public class AdminResourceController {
     }
 
     @GetMapping("/pending")
-    public List<PendingResourceDto> pending() {
-        return adminResourceService.listPending();
+    public AdminPendingPage pending(@RequestParam(defaultValue = "1") int limit) {
+        return adminResourceService.listPending(limit);
     }
 
     @GetMapping("/published")
@@ -55,6 +56,18 @@ public class AdminResourceController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deletePublished(@PathVariable long id) {
         adminResourceService.deletePublished(id);
+    }
+
+    @PatchMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void updatePending(@PathVariable long id, @Valid @RequestBody AdminResourceUpdateRequest body) {
+        adminResourceService.updatePending(id, body);
+    }
+
+    @PatchMapping("/published/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void updatePublished(@PathVariable long id, @Valid @RequestBody AdminResourceUpdateRequest body) {
+        adminResourceService.updatePublished(id, body);
     }
 
     @PostMapping("/{id}/approve")

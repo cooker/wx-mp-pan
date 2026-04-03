@@ -5,6 +5,17 @@ spring:
   sql:
     init:
       mode: always
+  web:
+    resources:
+      # 优先从磁盘读静态资源（与 pnpm build 输出一致），替换文件后无需重启 JVM；未部署源码树时 classpath 仍可用
+      static-locations:
+        - "file:${STATIC_ROOT:${user.dir}/src/main/resources/static/}"
+        - "classpath:/static/"
+      # 关闭缓存头，避免浏览器长期缓存旧 index.html / chunk
+      cache:
+        period: 0
+      chain:
+        cache: false
 
 server:
   port: 8080

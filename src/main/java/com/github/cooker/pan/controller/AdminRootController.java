@@ -16,8 +16,8 @@ public class AdminRootController {
         if (authentication != null
             && authentication.isAuthenticated()
             && !(authentication instanceof AnonymousAuthenticationToken)) {
-            return "redirect:/admin/index.html";
+            return "redirect:/admin/dashboard";
         }
-        return "redirect:/admin/login.html";
+        return "redirect:/admin/login";
     }
 }

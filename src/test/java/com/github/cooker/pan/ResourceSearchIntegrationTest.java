@@ -93,11 +93,7 @@ class ResourceSearchIntegrationTest {
 
         mockMvc.perform(get("/index.html"))
             .andExpect(status().isOk())
-            .andExpect(content().string(containsString("id=\"searchForm\"")))
-            .andExpect(content().string(containsString("id=\"sortBy\"")))
-            .andExpect(content().string(containsString("id=\"btnOpenSubmitResource\"")))
-            .andExpect(content().string(containsString("id=\"btnOpenBlockWord\"")))
-            .andExpect(content().string(containsString("id=\"homeStats\"")));
+            .andExpect(content().string(containsString("id=\"root\"")));
     }
 
     @Test

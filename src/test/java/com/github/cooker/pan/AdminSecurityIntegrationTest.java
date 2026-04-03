@@ -2,6 +2,7 @@ package com.github.cooker.pan;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -24,20 +25,20 @@ class AdminSecurityIntegrationTest {
 
     @Test
     void loginPageIsPublic() throws Exception {
-        mockMvc.perform(get("/admin/login.html"))
+        mockMvc.perform(get("/admin/login"))
             .andExpect(status().isOk());
     }
 
     @Test
     void dashboardRedirectsToLoginWhenAnonymous() throws Exception {
-        mockMvc.perform(get("/admin/index.html"))
+        mockMvc.perform(get("/admin/dashboard"))
             .andExpect(status().isFound())
-            .andExpect(redirectedUrl("http://localhost/admin/login.html"));
+            .andExpect(redirectedUrl("http://localhost/admin/login"));
     }
 
     @Test
     void dashboardOkWhenAuthenticated() throws Exception {
-        mockMvc.perform(get("/admin/index.html").with(user("admin").roles("ADMIN")))
+        mockMvc.perform(get("/admin/dashboard").with(user("admin").roles("ADMIN")))
             .andExpect(status().isOk());
     }
 
@@ -51,14 +52,14 @@ class AdminSecurityIntegrationTest {
     void adminRootRedirectsToLoginWhenAnonymous() throws Exception {
         mockMvc.perform(get("/admin"))
             .andExpect(status().isFound())
-            .andExpect(redirectedUrl("/admin/login.html"));
+            .andExpect(redirectedUrl("/admin/login"));
     }
 
     @Test
     void adminRootRedirectsToDashboardWhenAuthenticated() throws Exception {
         mockMvc.perform(get("/admin").with(user("admin").roles("ADMIN")))
             .andExpect(status().isFound())
-            .andExpect(redirectedUrl("/admin/index.html"));
+            .andExpect(redirectedUrl("/admin/dashboard"));
     }
 
     @Test
@@ -78,6 +79,17 @@ class AdminSecurityIntegrationTest {
                     .with(user("admin").roles("ADMIN")))
             .andExpect(status().isCreated())
             .andExpect(jsonPath("$.id").exists());
+    }
+
+    @Test
+    void updatePublishedResourceNotFoundWhenAuthenticated() throws Exception {
+        mockMvc.perform(
+                patch("/api/admin/resources/published/999999999")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        "{\"title\":\"不存在\",\"content\":\"\",\"type\":null,\"tags\":null,\"url\":\"\",\"categoryId\":null}")
+                    .with(user("admin").roles("ADMIN")))
+            .andExpect(status().isNotFound());
     }
 
     @Test

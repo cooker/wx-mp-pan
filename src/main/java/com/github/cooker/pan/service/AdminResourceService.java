@@ -1,14 +1,16 @@
 package com.github.cooker.pan.service;
 
 import com.github.cooker.pan.dto.AdminCreatePublishedResourceRequest;
+import com.github.cooker.pan.dto.AdminPendingPage;
 import com.github.cooker.pan.dto.AdminPublishedPage;
+import com.github.cooker.pan.dto.AdminResourceUpdateRequest;
 import com.github.cooker.pan.dto.ApproveResourceRequest;
-import com.github.cooker.pan.dto.PendingResourceDto;
 import com.github.cooker.pan.repository.CategoryRepository;
 import com.github.cooker.pan.repository.ResourceRepository;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 @Service
@@ -22,8 +24,18 @@ public class AdminResourceService {
         this.categoryRepository = categoryRepository;
     }
 
-    public List<PendingResourceDto> listPending() {
-        return resourceRepository.findPending();
+    public AdminPendingPage listPending(int limit) {
+        if (limit <= 0) {
+            limit = 1;
+        }
+        if (limit > 100) {
+            limit = 100;
+        }
+        long total = resourceRepository.countPending();
+        if (total == 0) {
+            return new AdminPendingPage(0, List.of());
+        }
+        return new AdminPendingPage(total, resourceRepository.findPendingPage(limit));
     }
 
     public void approve(long id, ApproveResourceRequest body) {
@@ -60,6 +72,72 @@ public class AdminResourceService {
         if (resourceRepository.deletePublished(id) == 0) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "资源不存在或不是已上线状态");
         }
+    }
+
+    @Transactional
+    public void updatePending(long id, AdminResourceUpdateRequest req) {
+        applyResourceUpdate(
+            id,
+            req,
+            (i, title, content, type, tags, url, cat) ->
+                resourceRepository.updatePendingResource(i, title, content, type, tags, url, cat),
+            "资源不存在或不是待审核状态"
+        );
+    }
+
+    @Transactional
+    public void updatePublished(long id, AdminResourceUpdateRequest req) {
+        applyResourceUpdate(
+            id,
+            req,
+            (i, title, content, type, tags, url, cat) ->
+                resourceRepository.updatePublishedResource(i, title, content, type, tags, url, cat),
+            "资源不存在或不是已上线状态"
+        );
+    }
+
+    private void applyResourceUpdate(
+        long id,
+        AdminResourceUpdateRequest req,
+        UpdateResourceFn fn,
+        String notFoundMessage
+    ) {
+        Long categoryId = req.categoryId();
+        if (categoryId != null && !categoryRepository.existsById(categoryId)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "无效的分类");
+        }
+        String title = req.title().trim();
+        String content = req.content() == null ? "" : req.content().trim();
+        String type = req.type();
+        if (type != null && type.isBlank()) {
+            type = null;
+        }
+        String tags = req.tags();
+        if (tags != null && tags.isBlank()) {
+            tags = null;
+        }
+        String url = req.url();
+        if (url == null || url.isBlank()) {
+            url = "";
+        } else {
+            url = url.trim();
+        }
+        if (fn.apply(id, title, content, type, tags, url, categoryId) == 0) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, notFoundMessage);
+        }
+    }
+
+    @FunctionalInterface
+    private interface UpdateResourceFn {
+        int apply(
+            long id,
+            String title,
+            String content,
+            String type,
+            String tags,
+            String url,
+            Long categoryId
+        );
     }
 
     public long createPublished(AdminCreatePublishedResourceRequest request) {

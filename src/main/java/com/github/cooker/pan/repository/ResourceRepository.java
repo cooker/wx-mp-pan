@@ -128,15 +128,22 @@ public class ResourceRepository {
         return new SearchResponse(total, items);
     }
 
-    public List<PendingResourceDto> findPending() {
+    public long countPending() {
+        Long n = jdbcTemplate.queryForObject("SELECT COUNT(1) FROM resource WHERE status = 0", Long.class);
+        return n == null ? 0L : n;
+    }
+
+    public List<PendingResourceDto> findPendingPage(int limit) {
         return jdbcTemplate.query(
             """
                 SELECT id, title, url, content, type, tags, category_id, created_at
                 FROM resource
                 WHERE status = 0
                 ORDER BY created_at ASC, id ASC
+                LIMIT ?
                 """,
-            pendingRowMapper()
+            pendingRowMapper(),
+            limit
         );
     }
 
@@ -223,6 +230,83 @@ public class ResourceRepository {
             k,
             size,
             page * size
+        );
+    }
+
+    /** 编辑待审核资源（同步 FTS） */
+    public int updatePendingResource(
+        long id,
+        String title,
+        String content,
+        String type,
+        String tags,
+        String url,
+        Long categoryId
+    ) {
+        Instant now = Instant.now();
+        int n =
+            jdbcTemplate.update(
+                """
+                    UPDATE resource
+                    SET title = ?, content = ?, type = ?, tags = ?, url = ?, category_id = ?, updated_at = ?
+                    WHERE id = ? AND status = 0
+                    """,
+                title,
+                content,
+                type,
+                tags,
+                url,
+                categoryId,
+                Timestamp.from(now),
+                id
+            );
+        if (n > 0) {
+            syncFts(id, title, content, tags);
+        }
+        return n;
+    }
+
+    /** 编辑已上线资源全文与分类（同步 FTS） */
+    public int updatePublishedResource(
+        long id,
+        String title,
+        String content,
+        String type,
+        String tags,
+        String url,
+        Long categoryId
+    ) {
+        Instant now = Instant.now();
+        int n =
+            jdbcTemplate.update(
+                """
+                    UPDATE resource
+                    SET title = ?, content = ?, type = ?, tags = ?, url = ?, category_id = ?, updated_at = ?
+                    WHERE id = ? AND status = 1
+                    """,
+                title,
+                content,
+                type,
+                tags,
+                url,
+                categoryId,
+                Timestamp.from(now),
+                id
+            );
+        if (n > 0) {
+            syncFts(id, title, content, tags);
+        }
+        return n;
+    }
+
+    private void syncFts(long id, String title, String content, String tags) {
+        String t = tags == null ? "" : tags;
+        jdbcTemplate.update(
+            "UPDATE resource_fts SET title = ?, content = ?, tags = ? WHERE rowid = ?",
+            title,
+            content == null ? "" : content,
+            t,
+            id
         );
     }
 
