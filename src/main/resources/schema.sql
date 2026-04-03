@@ -32,7 +32,8 @@ CREATE TABLE IF NOT EXISTS site_config (
   site_title TEXT NOT NULL DEFAULT '资源检索系统',
   header_script TEXT,
   tracking_enabled INTEGER NOT NULL DEFAULT 0,
-  tracking_events TEXT
+  tracking_events TEXT,
+  app_recommendations TEXT
 );
 
 -- status: 0=待审核 1=已上线

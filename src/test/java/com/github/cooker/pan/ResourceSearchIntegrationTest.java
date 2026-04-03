@@ -108,7 +108,8 @@ class ResourceSearchIntegrationTest {
     void publicSiteConfigOk() throws Exception {
         mockMvc.perform(get("/api/site/config"))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.siteTitle").exists());
+            .andExpect(jsonPath("$.siteTitle").exists())
+            .andExpect(jsonPath("$.appRecommendations").isArray());
     }
 
     @Test

@@ -4,6 +4,7 @@ import com.github.cooker.pan.dto.CategoryDto;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
@@ -52,6 +53,19 @@ public class CategoryRepository {
     public boolean existsById(long id) {
         Integer n = jdbcTemplate.queryForObject("SELECT COUNT(1) FROM category WHERE id = ?", Integer.class, id);
         return n != null && n > 0;
+    }
+
+    /** 按名称（忽略大小写与首尾空白）查找分类 id */
+    public Optional<Long> findIdByNameIgnoreCase(String name) {
+        if (name == null || name.isBlank()) {
+            return Optional.empty();
+        }
+        List<Long> ids =
+            jdbcTemplate.query(
+                "SELECT id FROM category WHERE LOWER(TRIM(name)) = LOWER(TRIM(?)) LIMIT 1",
+                (rs, rowNum) -> rs.getLong(1),
+                name.trim());
+        return ids.isEmpty() ? Optional.empty() : Optional.of(ids.getFirst());
     }
 
     private RowMapper<CategoryDto> categoryRowMapper() {

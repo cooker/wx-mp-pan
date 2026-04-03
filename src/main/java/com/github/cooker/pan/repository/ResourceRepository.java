@@ -45,11 +45,19 @@ public class ResourceRepository {
 
     /** 管理端新增并直接上线，同步写入 FTS。 */
     public long createPublished(String title, String content, String type, String tags, String url, Long categoryId) {
+        return createPublished(title, content, type, tags, url, categoryId, 0);
+    }
+
+    /** 管理端新增并直接上线，可指定热度。 */
+    public long createPublished(
+        String title, String content, String type, String tags, String url, Long categoryId, int heatScore
+    ) {
         Instant now = Instant.now();
+        int heat = Math.max(0, heatScore);
         jdbcTemplate.update(
             """
-                INSERT INTO resource (title, content, type, tags, url, status, category_id, created_at, updated_at)
-                VALUES (?, ?, ?, ?, ?, 1, ?, ?, ?)
+                INSERT INTO resource (title, content, type, tags, url, status, category_id, heat_score, created_at, updated_at)
+                VALUES (?, ?, ?, ?, ?, 1, ?, ?, ?, ?)
                 """,
             title,
             content,
@@ -57,6 +65,7 @@ public class ResourceRepository {
             tags,
             url,
             categoryId,
+            heat,
             Timestamp.from(now),
             Timestamp.from(now)
         );
@@ -69,6 +78,21 @@ public class ResourceRepository {
             tags
         );
         return id;
+    }
+
+    /** 全量导出：所有已上线资源（含正文），按 id 升序 */
+    public List<AdminPublishedResourceDto> findAllPublishedForExport() {
+        return jdbcTemplate.query(
+            """
+                SELECT r.id, r.title, r.url, r.type, r.tags, r.category_id, c.name AS category_name,
+                       r.heat_score, r.created_at, r.updated_at, r.content AS content
+                FROM resource r
+                LEFT JOIN category c ON c.id = r.category_id
+                WHERE r.status = 1
+                ORDER BY r.id ASC
+                """,
+            adminPublishedRowMapper()
+        );
     }
 
     public SearchResponse searchByKeyword(String keyword, SortBy sortBy, int page, int size, List<String> blockedKeywords) {

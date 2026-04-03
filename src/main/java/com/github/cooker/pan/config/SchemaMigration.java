@@ -28,6 +28,7 @@ public class SchemaMigration {
         ensureColumn("blocked_keyword", "status", "INTEGER NOT NULL DEFAULT 1");
         ensureColumn("site_config", "tracking_enabled", "INTEGER NOT NULL DEFAULT 0");
         ensureColumn("site_config", "tracking_events", "TEXT");
+        ensureColumn("site_config", "app_recommendations", "TEXT");
         ensureColumn("analytics_event", "device_id", "TEXT");
         ensureColumn("analytics_event", "ip_address", "TEXT");
     }
@@ -40,7 +41,8 @@ public class SchemaMigration {
                   site_title TEXT NOT NULL DEFAULT '资源检索系统',
                   header_script TEXT,
                   tracking_enabled INTEGER NOT NULL DEFAULT 0,
-                  tracking_events TEXT
+                  tracking_events TEXT,
+                  app_recommendations TEXT
                 )
                 """
         );

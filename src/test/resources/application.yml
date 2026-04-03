@@ -12,4 +12,4 @@ app:
     in-memory: true
   admin:
     username: admin
-    password: test-admin-secret
+    password: admin321

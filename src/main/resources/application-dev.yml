@@ -1,0 +1,5 @@
+# 本地调试：启动时加 --spring.profiles.active=dev
+# 后台登录任意密码均可通过（用户名仍为 app.admin.username，默认 admin）
+app:
+  admin:
+    relax-auth: true
